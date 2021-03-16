@@ -2,19 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def fun(t, uk):
-    return -nu*(kout @ uk) + Sk 
+    return -nu*(kout*uk) + Sk 
 
 N = 16
 nu = 100
 x = np.linspace(-1, 1, N+1)[:-1]
 y = x
 L = 2
-k1 = np.arange(-N/2, N/2)*2*np.pi/L
-#k1 = k1**2
-k2 = k1
-kout = np.outer(k1, k2)
+n1 = np.arange(-N/2, N/2)*2*np.pi/L
+n1 = n1**2
+n2 = n1
 
-# meshing
+#kout = np.outer(n1, n2)
+kout = np.add.outer(n1, n2)
+
 X, Y = np.meshgrid(x,y)
 # source 
 S = 100*np.exp(-(X**2-1)**6 -(Y**2-1)**6) -60
@@ -23,12 +24,12 @@ Sk = np.fft.fftshift(np.fft.fft2(S))/N**2
 u0 = (1 -X**2)**4*(1 -Y**2)**4
 
 t = 0.0
-tf = 0.0001
-dt = 0.000001
+tf = 0.01
+dt = 0.0000001
 
 u = u0
 uk = np.fft.fftshift(np.fft.fft2(u))/N**2
-ukn = np.zeros_like(u)
+ukn = np.zeros_like(uk)
 
 while t < tf:
     k1 = dt*fun(t, uk)
@@ -39,9 +40,10 @@ while t < tf:
     uk = ukn
     t = t + dt
 
-sol = np.fft.ifft2(np.fft.ifftshift(uk))*N**2
+sol = np.fft.ifft2(np.fft.ifftshift(uk))*(N**2)
+
 f1 = plt.figure(1)
-plt.plot(x, np.real(sol[:,0]),'ro-')
+plt.plot(x, np.real(sol[:,int(len(x)/2)]),'ro-')
 plt.title('Solution at x = 0')
 plt.show()
 
@@ -50,7 +52,7 @@ plt.contourf(X, Y, np.real(sol))
 plt.colorbar()
 plt.show()
 
-xy = np.zeros_like(x)
+xy = np.zeros_like(x, dtype='complex')
 for i in range(N):
     xy[i] = sol[i,i]
 

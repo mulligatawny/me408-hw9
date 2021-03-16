@@ -36,7 +36,7 @@ while t < tf:
     k2 = dt*fun(t+dt/2, uk+k1/2)
     k3 = dt*fun(t+dt/2, uk+k2/2)
     k4 = dt*fun(t+dt, uk+k3)
-    ukn = (uk + k1/6 + k2/3 + k3/3 + k4/6)
+    ukn = (uk + k1/6 + k2/3 + k3/3 + k4/6)*rog
     uk = ukn
     t = t + dt
 
