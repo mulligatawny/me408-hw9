@@ -24,25 +24,27 @@ from scipy.linalg import expm, sinm, cosm
 def solve(tf):
     t = 0.0
     #tf = 0.01
-    dt = 0.000001
+    dt = 0.0001
 
     rog = np.exp(-nu*(kout)*dt) # ROGALLO
+    rog2 = np.exp(-nu*(kout)*dt/2) # ROGALLO
     u = u0
     uk = np.fft.fftshift(np.fft.fft2(u))/N**2
     ukn = np.zeros_like(uk)
 
     while t < tf:
-        k1 = dt*fun(t, uk)*rog
-        k2 = dt*fun(t+dt/2, uk+k1/2)*rog
-        k3 = dt*fun(t+dt/2, uk+k2/2)*rog
-        k4 = dt*fun(t+dt, uk+k3)*rog
-        ukn = (uk + k1/6 + k2/3 + k3/3 + k4/6)*rog
+        k1 = dt*fun(t, uk)
+        k2 = dt*fun(t+dt/2, uk+k1/2)
+        k3 = dt*fun(t+dt/2, uk+k2/2)
+        k4 = dt*fun(t+dt, uk+k3)
+        ukn = (uk*rog + k1/6*rog + k2/3*rog2 + k3/3*rog2 + k4/6*rog)
         uk = ukn
         t = t + dt
 
     return np.fft.ifft2(np.fft.ifftshift(uk))*(N**2)
 
 times = np.array([0.00025, 0.0005, 0.00075, 0.001, 0.01])
+#times = np.array([0.01])
 sols = np.zeros(((N, N, len(times))), dtype='complex')
 
 fig1 = 0
@@ -58,7 +60,7 @@ for i in range(len(times)):
         plt.grid()
         plt.legend()
 
-    if fig1:
+    if not fig1:
         plt.plot(x, np.real(sols[int(len(x)/2),:,i]),'o-', label='t = {:.5f}'.format(times[i]))
         plt.xlabel('$x$')
         plt.ylabel('$u$')
@@ -66,7 +68,7 @@ for i in range(len(times)):
         plt.grid()
         plt.legend()
 
-#plt.show()
+plt.show()
 
 xy = np.zeros_like(x, dtype='complex')
 plot_xy = 1
@@ -84,4 +86,4 @@ for i in range(len(times)):
 
 #plt.contourf(X, Y, np.real(sols[:,:,-1]))
 #plt.colorbar()
-plt.show()
+#plt.show()
