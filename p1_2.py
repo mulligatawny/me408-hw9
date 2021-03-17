@@ -18,7 +18,7 @@ def fun(t, uk):
     fk = np.fft.fftshift(np.fft.fft(f))/N
     return -3*fk
 
-N = 256
+N = 64
 L = 6
 x = np.linspace(-3, 3, N+1)[:-1]
 k = np.arange(-N/2, N/2)*2*np.pi/L
@@ -28,17 +28,18 @@ u0 = (64*np.exp(-12-8*x))/(1+np.exp(-12-8*x))**2 +\
 u = u0
 uk = np.fft.fftshift(np.fft.fft(u))/N
 t = 0.0
-tf = 0.4
-dt = 0.00005
+tf = 0.1
+dt = 0.00001
 ukn = np.zeros_like(u)
 
 rog = np.exp(1j*(k**3)*dt/4)
+rog2 = np.exp(1j*(k**3)*dt/8)
 while t < tf:
     k1 = dt*fun(t, uk)
     k2 = dt*fun(t+dt/2, uk+k1/2)
     k3 = dt*fun(t+dt/2, uk+k2/2)
     k4 = dt*fun(t+dt, uk+k3)
-    ukn = (uk + k1/6 + k2/3 + k3/3 + k4/6)*rog
+    ukn = (uk*rog + k1/6*rog + k2/3*rog2 + k3/3*rog2 + k4/6)
     uk = ukn
     t = t + dt
 
